@@ -1,39 +1,53 @@
-import org.apache.spark.{SparkContext, SparkConf}
-import weblog.WeblogAnalysizer
-
-import org.apache.spark.streaming.kafka.KafkaUtils
-import org.apache.spark.streaming.{Minutes, Seconds, StreamingContext}
 import org.apache.spark.sql.SQLContext
+import org.apache.spark.{SparkContext, SparkConf}
+import org.apache.spark.streaming.kafka.KafkaUtils
+import org.apache.spark.streaming.{Duration, Minutes, Seconds, StreamingContext}
+import org.apache.spark.streaming.StreamingContext._
+import weblog.WeblogAnalysizer
+import scala.util.parsing.json.JSON
+
 /**
- * Created by admin on 2015/4/7.
+ * Created by admin on 2015/4/11.
  */
-object KafkaAction {
-  //没有窗口，直接batch操作
+object Test {
+
+  //使用窗口操作
+  val WINDOW_LENGTH = new Duration(10 * 1000)
+  val SLIDE_INTERVAL = new Duration(6 * 1000)
+
   def main(args: Array[String]) {
+   /* val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming in Scala")
+    val sc = new SparkContext(sparkConf)
+
+    val sqlContext = new SQLContext(sc)
+    import sqlContext.createSchemaRDD
+
+    val streamingContext = new StreamingContext(sc, SLIDE_INTERVAL)
+
+    val logLinesDStream = streamingContext.socketTextStream("localhost", 9999)*/
     if (args.length < 4) {
       System.err.println("Usage: KafkaWordCount <zkQuorum> <group> <topics> <numThreads>")
       System.exit(1)
     }
 
     // StreamingExamples.setStreamingLogLevels()
-    val Array(zkQuorum, group, topics, numThreads,output) = args   //输入参数命名
 
+    val Array(zkQuorum, group, topics, numThreads,output) = args
     val sparkConf = new SparkConf().setAppName("KafkaWordCount")
-
     val sc = new SparkContext(sparkConf)
 
-    val ssc =  new StreamingContext(sc, Seconds(3))   //每两秒一批数据
+    val ssc =  new StreamingContext(sc, Seconds(2))
+   // ssc.checkpoint("/home/hadoop/hadoop/kafka/checkpoint")
+   val sqlContext = new SQLContext(sc)
+    import sqlContext.createSchemaRDD
 
-    val sqlContext = new SQLContext(sc)
-    import sqlContext.createSchemaRDD   //隐式转换
-
-//   ssc.checkpoint("/home/hadoop/hadoop/kafka/checkpoint")
-//    ssc.checkpoint("f://checkpoint")
     val topicMap = topics.split(",").map((_,numThreads.toInt)).toMap
-    val lineDstream = KafkaUtils.createStream(ssc, zkQuorum, group, topicMap).map(_._2)   //获取输入流
-    val weblogDstream = lineDstream.map(WeblogAnalysizer.parseLogLine).cache()
+    val lines = KafkaUtils.createStream(ssc, zkQuorum, group, topicMap).map(_._2)
+    val accessLogsDStream = lines.map(WeblogAnalysizer.parseLogLine).cache()
 
-    weblogDstream.foreachRDD(accessLogs => {
+    val windowDStream = accessLogsDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL)
+
+    windowDStream.foreachRDD(accessLogs => {
       if (accessLogs.count() == 0) {
         println("No access com.databricks.app.logs received in this time interval")
       } else {
@@ -69,21 +83,19 @@ object KafkaAction {
           .collect()
         println(s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
 
+        //数据导出
         val contentRDD = sqlContext
-        .sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM accesslog")
+          .sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM accesslog")
         println("--------------------------------------------储存中----------------------------------------------------------")
-        contentRDD.saveAsTextFile(output+System.currentTimeMillis())       // 这里只输出日志一次，为什么呢？？ 通过output那里加一个currentTimeMillis
-        val total = contentSizeStats.union(responseCodeToCount).union(ipAddresses)
-        total.foreach(println(_))
+        contentRDD.collect().foreach(println)
+        contentRDD.saveAsTextFile(output+System.currentTimeMillis())       // 这里只输出日志一次，为什么呢？？
       }
     })
 
     ssc.start()
     ssc.awaitTermination()
   }
-
-
- /* def main(args: Array[String]) {
+  /*def main(args: Array[String]) {
     if (args.length < 4) {
       System.err.println("Usage: KafkaWordCount <zkQuorum> <group> <topics> <numThreads>")
       System.exit(1)
@@ -114,5 +126,3 @@ object KafkaAction {
     })
   }*/
 }
-
-
