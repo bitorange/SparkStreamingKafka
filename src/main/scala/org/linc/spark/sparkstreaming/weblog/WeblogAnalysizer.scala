@@ -1,4 +1,4 @@
-package weblog
+package org.linc.spark.sparkstreaming.weblog
 
 /**
  * Created by admin on 2015/4/11.

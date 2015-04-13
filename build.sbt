@@ -20,9 +20,11 @@ scalaVersion := "2.10.4"
 libraryDependencies ++= {
   val sparkVersion = "1.2.0"
   Seq(
-    "org.apache.spark" %% "spark-streaming" % "1.2.0" % "provided",
+    "org.apache.spark" % "spark-streaming_2.10" % "1.2.1",
     "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
-    "org.apache.spark" %% "spark-streaming-kafka" % sparkVersion
+    "org.apache.spark" %% "spark-streaming-kafka" % sparkVersion,
+    "org.apache.spark" % "spark-sql_2.10" % "1.2.0",
+    "org.codehaus.jettison" % "jettison" % "1.3.5"
   )
 }
 
