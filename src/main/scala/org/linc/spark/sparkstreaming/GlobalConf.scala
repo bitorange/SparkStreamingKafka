@@ -15,7 +15,7 @@ object GlobalConf{
   val path: String = properties.getProperty("user.dir")
   val reader = Source.fromFile(path+"/SparkStreamingAndSql.conf").getLines()
   var map = HashMap[String, String]();
-  for(lines <- reader if lines.startsWith("#") == false ){
+  for(lines <- reader if lines.startsWith("#") == false;if lines != "" ){
     val keyValues = lines.split("=")
     map += (keyValues(0) -> keyValues(1))
   }
@@ -29,4 +29,8 @@ object GlobalConf{
   val outputFormatFilePath = map.get("outputFormatFilePath")
   val rulesFilePath = map.get("rulesFilePath")
   val outputPath = map.get("outputPath")
+  val batchInterval= map.get("batchInterval")
+  val windowInterval = map.get("windowInterval")
+  val slideInterval = map.get("slideInterval")
+  val sql = map.get("sql")
 }
