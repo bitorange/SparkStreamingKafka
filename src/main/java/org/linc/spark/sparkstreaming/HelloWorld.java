@@ -12,7 +12,19 @@ import java.util.LinkedHashMap;
  */
 public class HelloWorld {
     public static void main(String[] args){
-        /* 解析输入输出格式 */
+      /*  String a ="sql=SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM input";
+        String b[] = a.split("=");
+        for(int i = 0 ; i < b.length; i++){
+            System.out.println(b[i]);
+        }
+        String c = "a";
+        if(c == "a")
+            System.out .println("1");
+        else if (c.equals("a"))
+            System.out.println("2");
+        else
+            System.out.print("3");*/
+       //  解析输入输出格式
         InputAndOutputFormat inputAndOutputFormat = null;
         try {
             inputAndOutputFormat = new InputAndOutputFormat();
@@ -23,11 +35,11 @@ public class HelloWorld {
             e.printStackTrace();
         }
 
-        /* 创建规则用于测试 */
+        // 创建规则用于测试
         try {
             // 获取规则
             Rules rules = new Rules(inputAndOutputFormat);
-            String input = "2220140550\tihainan";
+            String input = "1.1.1.1\tGET\t/apps/logs/LogAnalyzer.java HTTP/1.1\t200\t1000";
             LinkedHashMap<String, String> inputValue = inputAndOutputFormat.splitInput(input);
 
             // 应用规则到每一个字段上
