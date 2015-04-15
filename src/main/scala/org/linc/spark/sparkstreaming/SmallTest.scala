@@ -19,8 +19,8 @@ import scala.collection.JavaConversions._
 
 object SmallTest {
   //使用窗口操作
-  val WINDOW_LENGTH = new Duration(10 * 1000)
-  val SLIDE_INTERVAL = new Duration(6 * 1000)
+  val WINDOW_LENGTH = new Duration(GlobalConf.windowInterval.get.toLong)
+  val SLIDE_INTERVAL = new Duration(GlobalConf.slideInterval.get.toLong)
   val inputAndOutputFormat = new InputAndOutputFormat()
   // 输入输出格式
   val rules = new Rules(inputAndOutputFormat) // 转换规则
@@ -30,7 +30,7 @@ object SmallTest {
     // Spark 系统上下文 ß
     val sparkConf = new SparkConf().setAppName("KafkaWordCount")
     val sc = new SparkContext(sparkConf)
-    val ssc = new StreamingContext(sc, Seconds(2))
+    val ssc = new StreamingContext(sc, Seconds(GlobalConf.batchInterval.get.toLong))
     val sqlContext = new SQLContext(sc)
 
     // 读取输入数据
@@ -90,7 +90,7 @@ object SmallTest {
 
         val schemaRDD = sqlContext.applySchema(rowRDD, inputSchema)
         schemaRDD.registerTempTable("input")
-        val contentSizeStats = sqlContext.sql("SELECT ID FROM input") // SQL 操作
+        val contentSizeStats = sqlContext.sql(GlobalConf.sql.get) // SQL 操作
         contentSizeStats.collect().foreach(println)
       }
     })
