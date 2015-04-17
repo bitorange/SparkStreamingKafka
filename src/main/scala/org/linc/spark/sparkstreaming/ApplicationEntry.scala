@@ -17,7 +17,7 @@ import scala.collection.JavaConversions._
  */
 
 
-object SmallTest {
+object ApplicationEntry {
   //使用窗口操作
   val WINDOW_LENGTH = new Duration(GlobalConf.windowInterval.get.toLong)
   val SLIDE_INTERVAL = new Duration(GlobalConf.slideInterval.get.toLong)
@@ -39,14 +39,14 @@ object SmallTest {
 
     /* 字段规则 */
     // 应用转换规则
-    val splitRDD = lines.map(x => inputAndOutputFormat.splitInput(x))
+    val splitRDD = lines.map(x => inputAndOutputFormat.splitInputIntoHashMap(x))
     val resultRDD = splitRDD.map(x => rules.applyRules(x))
 
     // 输出结果到 HDFS
     resultRDD.foreachRDD(allResult => {
       if (allResult.count() > 0) {
         val finalRDD = allResult.map(result => Rules.resultToStr(result))
-        // finalRDD.collect().foreach(println)
+        finalRDD.collect().foreach(println)
         finalRDD.saveAsTextFile(GlobalConf.outputPath.get)
       }
     })
@@ -69,7 +69,7 @@ object SmallTest {
       }
       StringType
     };
-    val inputValueRDD = lines.map(x => new util.ArrayList(inputAndOutputFormat.splitInput(x).values()))
+    val inputValueRDD = lines.map(x => new util.ArrayList(inputAndOutputFormat.splitInputIntoHashMap(x).values()))
 
     val inputSchema =
       StructType(inputAndOutputFormat.getInputFormat.keySet().map(key => StructField(key,
@@ -90,8 +90,8 @@ object SmallTest {
 
         val schemaRDD = sqlContext.applySchema(rowRDD, inputSchema)
         schemaRDD.registerTempTable("input")
-        val contentSizeStats = sqlContext.sql(GlobalConf.sql.get) // SQL 操作
-        contentSizeStats.collect().foreach(println)
+        // val contentSizeStats = sqlContext.sql(GlobalConf.sql.get) // SQL 操作
+        // contentSizeStats.collect().foreach(println)
       }
     })
 
