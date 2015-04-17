@@ -58,8 +58,8 @@ public class Rules {
      * @throws IllegalAccessException
      * @throws java.lang.reflect.InvocationTargetException
      */
-    public ArrayList<String> applyRules(HashMap<String, Object> inputValue) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        ArrayList<String> outputValue = new ArrayList<>();
+    public ArrayList<Object> applyRules(HashMap<String, Object> inputValue) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        ArrayList<Object> outputValue = new ArrayList<>();
         for(String outputField: inputAndOutputFormat.getOutputFormat().keySet()){
             // 寻找规则
             for(Rule rule: rules){

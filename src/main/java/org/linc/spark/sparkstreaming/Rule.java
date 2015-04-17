@@ -176,7 +176,7 @@ public class Rule {
         for (int i = 0; i < parametersValue.length; ++i) {
             String parameterValue = parametersValue[i];
             if (isFromInputField.get(i)) {
-                parametersValue[i] = (String) inputValue.get(parameterValue);
+                parametersValue[i] = inputValue.get(parameterValue).toString();
             } else if (parameterValue.charAt(0) == 34 && parameterValue.charAt(parameterValue.length() - 1) == 34
                     || parameterValue.charAt(0) == 39 && parameterValue.charAt(parameterValue.length() - 1) == 39) {
                 parametersValue[i] = parameterValue.substring(0, parameterValue.length() - 1).substring(1);
@@ -226,9 +226,7 @@ public class Rule {
                     Method methodToInvoke = cls.getDeclaredMethod(getFunctionName(), possibleTypes.toArray(new Class[possibleTypes.size()]));
                     isFoundMethod = true;
                     result = methodToInvoke.invoke(null, parametersValueObj.toArray(new Object[parametersValueObj.size()]));
-                } catch (NoSuchMethodException noSuchMethodException) {
-                    // Do nothing
-                } catch (InvocationTargetException e) {
+                } catch (NoSuchMethodException | InvocationTargetException noSuchMethodException) {
                     // Do nothing
                 } catch (IllegalAccessException e) {
                     // Do nothing

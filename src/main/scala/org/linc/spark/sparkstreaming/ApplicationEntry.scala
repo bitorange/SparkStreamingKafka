@@ -99,10 +99,11 @@ object ApplicationEntry {
         outputSchemaRDD.registerTempTable("output")
 
         // 执行 SQL 查询
-        println("Count = " + inputRowRDD.count)
         val contentSizeStats = sqlContext.sql(GlobalConf.sql.get)
         println("SQL Query Result: ")
+        println("Count = " + contentSizeStats.count)
         contentSizeStats.collect().foreach(println)
+        contentSizeStats.saveAsTextFile(GlobalConf.sqlOutPutPath.get)
       }
     })
 

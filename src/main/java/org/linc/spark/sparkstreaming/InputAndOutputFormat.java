@@ -83,7 +83,6 @@ public class InputAndOutputFormat {
      * @throws org.codehaus.jettison.json.JSONException 解析失败
      */
     public InputAndOutputFormat() throws IOException, JSONException {
-        // TODO: 处理出现非合法类型的情况
         // 解析输入格式
         HashMap<String, String> inputFormatObj = this.parseFormatFile(inputFormatFilePath);
         for (String key : inputFormatObj.keySet()) {
@@ -109,7 +108,14 @@ public class InputAndOutputFormat {
         int i = 0;
         for (String field : inputFormat.keySet()) {
             String value = splitInput[i];
-            Object valueObj = TypeMethods.valueOf(TypeMethods.getClassByName(inputFormat.get(field)), value);
+            Class type = TypeMethods.getClassByName(inputFormat.get(field));
+            Object valueObj;
+            if(type == String.class){
+                valueObj = value;
+            }
+            else{
+                valueObj =  TypeMethods.valueOf(type, value);
+            }
             inputValue.put(field, valueObj);
             i++;
         }

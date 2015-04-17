@@ -24,6 +24,7 @@ public class HelloWorld {
         }
 
         // 创建规则用于测试
+        /*
         try {
             // 获取规则
             Rules rules = new Rules(inputAndOutputFormat);
@@ -48,5 +49,6 @@ public class HelloWorld {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+        */
     }
 }
