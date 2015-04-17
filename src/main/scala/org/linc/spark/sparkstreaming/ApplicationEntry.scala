@@ -51,7 +51,7 @@ object ApplicationEntry {
     outputArrayRDD.foreachRDD(allResult => {
       if (allResult.count() > 0) {
         val finalRDD = allResult.map(result => result) // Nothing to do
-        // finalRDD.collect().foreach(println)
+        finalRDD.collect().foreach(println)
         finalRDD.saveAsTextFile(GlobalConf.outputPath.get)
       }
     })

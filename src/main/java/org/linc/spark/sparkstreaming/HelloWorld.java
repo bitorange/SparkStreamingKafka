@@ -12,18 +12,6 @@ import java.util.LinkedHashMap;
  */
 public class HelloWorld {
     public static void main(String[] args){
-      /*  String a ="sql=SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM input";
-        String b[] = a.split("=");
-        for(int i = 0 ; i < b.length; i++){
-            System.out.println(b[i]);
-        }
-        String c = "a";
-        if(c == "a")
-            System.out .println("1");
-        else if (c.equals("a"))
-            System.out.println("2");
-        else
-            System.out.print("3");*/
        //  解析输入输出格式
         InputAndOutputFormat inputAndOutputFormat = null;
         try {
@@ -40,10 +28,10 @@ public class HelloWorld {
             // 获取规则
             Rules rules = new Rules(inputAndOutputFormat);
             String input = "1.1.1.1\tGET\t/apps/logs/LogAnalyzer.java HTTP/1.1\t200\t1000";
-            LinkedHashMap<String, String> inputValue = inputAndOutputFormat.splitInput(input);
+            LinkedHashMap<String, String> inputValue = inputAndOutputFormat.splitInputIntoHashMap(input);
 
             // 应用规则到每一个字段上
-            ArrayList<Object> result = rules.applyRules(inputValue);
+            ArrayList<String> result = rules.applyRules(inputValue);
             for(Object object: result){
                 System.out.println(object);
             }

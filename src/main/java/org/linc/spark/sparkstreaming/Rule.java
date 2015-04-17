@@ -75,7 +75,7 @@ public class Rule {
 
 
     /**
-     * 或者需要调用函数所在的类
+     * 或者需要调用函数所在的类va
      *
      * @return 函数所在的类
      */
@@ -172,11 +172,11 @@ public class Rule {
      * @param inputValue      所有输入字段的值（可能是变量）
      * @return 转换后的参数值（都是常量）
      */
-    public String[] getConstantValueOfParameters(String[] parametersValue, HashMap<String, String> inputValue) {
+    public String[] getConstantValueOfParameters(String[] parametersValue, HashMap<String, Object> inputValue) {
         for (int i = 0; i < parametersValue.length; ++i) {
             String parameterValue = parametersValue[i];
             if (isFromInputField.get(i)) {
-                parametersValue[i] = inputValue.get(parameterValue);
+                parametersValue[i] = (String) inputValue.get(parameterValue);
             } else if (parameterValue.charAt(0) == 34 && parameterValue.charAt(parameterValue.length() - 1) == 34
                     || parameterValue.charAt(0) == 39 && parameterValue.charAt(parameterValue.length() - 1) == 39) {
                 parametersValue[i] = parameterValue.substring(0, parameterValue.length() - 1).substring(1);
@@ -193,7 +193,7 @@ public class Rule {
      * @throws ClassNotFoundException 找不到规则中规定的类
      * @throws NoSuchMethodException  找不到规则定规定的方法
      */
-    public Object applyRuleToOneLine(HashMap<String, String> inputValue) throws ClassNotFoundException, NoSuchMethodException {
+    public Object applyRuleToOneLine(HashMap<String, Object> inputValue) throws ClassNotFoundException, NoSuchMethodException {
         // 构建 parametersValue
         String[] parametersValue = Arrays.copyOf(parameters, parameters.length);
 

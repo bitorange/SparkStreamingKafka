@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
+ * 用于存储规则信息的类
  * Created by ihainan on 4/13/15.
  */
 public class Rules {
@@ -16,7 +17,7 @@ public class Rules {
 
     static {
         // 获取规则文件路径
-        ruleFile = (String) GlobalConf.rulesFilePath().get();
+        ruleFile = GlobalConf.rulesFilePath().get();
     }
 
     private ArrayList<Rule> rules = new ArrayList<>();
@@ -57,15 +58,15 @@ public class Rules {
      * @throws IllegalAccessException
      * @throws java.lang.reflect.InvocationTargetException
      */
-    public ArrayList<Object> applyRules(HashMap<String, String> inputValue) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        ArrayList<Object> outputValue = new ArrayList<>();
+    public ArrayList<String> applyRules(HashMap<String, Object> inputValue) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        ArrayList<String> outputValue = new ArrayList<>();
         for(String outputField: inputAndOutputFormat.getOutputFormat().keySet()){
             // 寻找规则
             for(Rule rule: rules){
                 if(rule.getFieldName().equals(outputField)){
                     // 应用规则
-                    Object result = rule.applyRule(inputValue);
-                    outputValue.add(result);
+                    Object result = rule.applyRuleToOneLine(inputValue);
+                    outputValue.add(result.toString());
                     break;
                 }
             }
@@ -89,16 +90,4 @@ public class Rules {
         return result;
     }
 
-    /**
-     * Array<Object> 转换成 ArrayList<String>
-     * @param oldList Array<Object>
-     * @return ArrayList<String>
-     */
-    public static ArrayList<String> convertArray(ArrayList<Object> oldList){
-        ArrayList<String> newList = new ArrayList<>();
-        for (Object item: oldList){
-            newList.add(String.valueOf(item));
-        }
-        return newList;
-    }
 }
