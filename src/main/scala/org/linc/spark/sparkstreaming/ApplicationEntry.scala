@@ -12,7 +12,7 @@ import scala.collection.JavaConversions._
 
 /**
  * this class is a test to use kafka, Spark Streaming, Spark SQL and HDFS in which the data is traced by kafka ,
- * procesded by Spark Streaming, SQLed by Spark SQL and saved in HDFS finally.
+ * processed by Spark Streaming, SQLed by Spark SQL and saved in HDFS finally.
  * Created by xwc on 2015/4/12.
  */
 
