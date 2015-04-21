@@ -22,7 +22,7 @@ public class TypeMethods {
     }
 
     private static Set<Class<?>> getWrapperTypes() {
-        Set<Class<?>> ret = new HashSet<>();
+        Set<Class<?>> ret = new HashSet<Class<?>>();
         ret.add(String.class);
         ret.add(Boolean.class);
         ret.add(Character.class);
@@ -44,47 +44,46 @@ public class TypeMethods {
      * @throws ClassNotFoundException 找不到字符串表示的类
      */
     public static Class getCorrespondingDataTypeByString(String typeStr) throws ClassNotFoundException {
-        switch (typeStr) {
-            case "int":
-                return Integer.class;
-            case "Integer":
-                return int.class;
-            case "long":
-                return Long.class;
-            case "Long":
-                return long.class;
-            case "double":
-                return Double.class;
-            case "Double":
-                return double.class;
-            case "float":
-                return Float.class;
-            case "Float":
-                return float.class;
-            case "Boolean":
-                return boolean.class;
-            case "boolean":
-                return Boolean.class;
-            case "Character":
-                return char.class;
-            case "char":
-                return Character.class;
-            case "Byte":
-                return byte.class;
-            case "byte":
-                return Byte.class;
-            case "Void":
-                return void.class;
-            case "void":
-                return Void.class;
-            case "Short":
-                return short.class;
-            case "short":
-                return Short.class;
-            case "String":
-                return String.class;
-            default:
-                throw new ClassNotFoundException();
+        if (typeStr.equals("int")) {
+            return Integer.class;
+        } else if (typeStr.equals("Integer")) {
+            return int.class;
+        } else if (typeStr.equals("long")) {
+            return Long.class;
+        } else if (typeStr.equals("Long")) {
+            return long.class;
+        } else if (typeStr.equals("double")) {
+            return Double.class;
+        } else if (typeStr.equals("Double")) {
+            return double.class;
+        } else if (typeStr.equals("float")) {
+            return Float.class;
+        } else if (typeStr.equals("Float")) {
+            return float.class;
+        } else if (typeStr.equals("Boolean")) {
+            return boolean.class;
+        } else if (typeStr.equals("boolean")) {
+            return Boolean.class;
+        } else if (typeStr.equals("Character")) {
+            return char.class;
+        } else if (typeStr.equals("char")) {
+            return Character.class;
+        } else if (typeStr.equals("Byte")) {
+            return byte.class;
+        } else if (typeStr.equals("byte")) {
+            return Byte.class;
+        } else if (typeStr.equals("Void")) {
+            return void.class;
+        } else if (typeStr.equals("void")) {
+            return Void.class;
+        } else if (typeStr.equals("Short")) {
+            return short.class;
+        } else if (typeStr.equals("short")) {
+            return Short.class;
+        } else if (typeStr.equals("String")) {
+            return String.class;
+        } else {
+            throw new ClassNotFoundException();
         }
     }
 
@@ -120,9 +119,11 @@ public class TypeMethods {
                     klazz.getDeclaredMethod("valueOf", String.class)
                             .invoke(null, arg)
             );
-        } catch (NoSuchMethodException | IllegalAccessException e) {
+        } catch (NoSuchMethodException e) {
             cause = e;
         } catch (InvocationTargetException e) {
+            cause = e;
+        } catch (IllegalAccessException e) {
             cause = e;
         }
         if (cause == null) {

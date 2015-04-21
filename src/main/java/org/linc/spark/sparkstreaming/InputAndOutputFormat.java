@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 /**
- * Created by ihainan on 4/11/15.
+ * 本类用于表示输入和输出格式
  */
 public class InputAndOutputFormat {
     private static String inputFormatFilePath = "/Users/ihainan/tmp/inputFormat.json";
@@ -25,8 +25,8 @@ public class InputAndOutputFormat {
         outputFormatFilePath = GlobalConf.outputFormatFilePath().get();
     }
 
-    private LinkedHashMap<String, String> inputFormat = new LinkedHashMap<>();  // 输入格式，通过 字段：属性 的集合表示
-    private LinkedHashMap<String, String> outputFormat = new LinkedHashMap<>(); // 输出格式，通过 字段：属性 的集合表示
+    private LinkedHashMap<String, String> inputFormat = new LinkedHashMap<String, String>();  // 输入格式，通过 字段：属性 的集合表示
+    private LinkedHashMap<String, String> outputFormat = new LinkedHashMap<String, String>(); // 输出格式，通过 字段：属性 的集合表示
 
     /**
      * 获取输入数据格式
@@ -63,7 +63,7 @@ public class InputAndOutputFormat {
         }
 
         // 解析 JSON
-        LinkedHashMap<String, String> result = new LinkedHashMap<>();
+        LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
         JSONObject obj = new JSONObject(jsonBody);
         Iterator it = obj.keys();
         while (it.hasNext()) {
@@ -103,18 +103,17 @@ public class InputAndOutputFormat {
      * @return 包含输入数据的 LinkedHashMap
      */
     public LinkedHashMap<String, Object> splitInputIntoHashMap(String inputStr) throws ClassNotFoundException {
-        LinkedHashMap<String, Object> inputValue = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> inputValue = new LinkedHashMap<String, Object>();
         String[] splitInput = inputStr.split("\t");
         int i = 0;
         for (String field : inputFormat.keySet()) {
             String value = splitInput[i];
             Class type = TypeMethods.getClassByName(inputFormat.get(field));
             Object valueObj;
-            if(type == String.class){
+            if (type == String.class) {
                 valueObj = value;
-            }
-            else{
-                valueObj =  TypeMethods.valueOf(type, value);
+            } else {
+                valueObj = TypeMethods.valueOf(type, value);
             }
             inputValue.put(field, valueObj);
             i++;

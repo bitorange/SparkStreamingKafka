@@ -88,8 +88,8 @@ public class Rule {
     private String className;
     private String functionName;
     private String[] parameters;    // 函数参数列表
-    private ArrayList<Class> paramsTypeList = new ArrayList<>();    // 用于确定参数的类型，注意参数可能是输入，即与某输入项相同数据类型
-    private ArrayList<Boolean> isFromInputField = new ArrayList<>(); // 用于判断一个参数是变量还是常量
+    private ArrayList<Class> paramsTypeList = new ArrayList<Class>();    // 用于确定参数的类型，注意参数可能是输入，即与某输入项相同数据类型
+    private ArrayList<Boolean> isFromInputField = new ArrayList<Boolean>(); // 用于判断一个参数是变量还是常量
 
     /**
      * 确定参数类型
@@ -98,8 +98,8 @@ public class Rule {
      */
     private void getParametersTypeList() throws ClassNotFoundException {
         // 确定参数类型
-        paramsTypeList = new ArrayList<>();
-        isFromInputField = new ArrayList<>();
+        paramsTypeList = new ArrayList<Class>();
+        isFromInputField = new ArrayList<Boolean>();
         for (String parameter : parameters) {
             Class type = convertParameterValueToBasicType(parameter);
             paramsTypeList.add(type);
@@ -207,7 +207,7 @@ public class Rule {
         parametersValue = this.getConstantValueOfParameters(parametersValue, inputValue);
 
         // 强制转换
-        ArrayList<Object> parametersValueObj = new ArrayList<>();
+        ArrayList<Object> parametersValueObj = new ArrayList<Object>();
         for (int i = 0; i < parametersValue.length; ++i) {
             String value = parametersValue[i];
             Object object = !paramsTypeList.get(i).equals(String.class) ? TypeMethods.valueOf(paramsTypeList.get(i), value) : value;
@@ -226,9 +226,11 @@ public class Rule {
                     Method methodToInvoke = cls.getDeclaredMethod(getFunctionName(), possibleTypes.toArray(new Class[possibleTypes.size()]));
                     isFoundMethod = true;
                     result = methodToInvoke.invoke(null, parametersValueObj.toArray(new Object[parametersValueObj.size()]));
-                } catch (NoSuchMethodException | InvocationTargetException noSuchMethodException) {
+                } catch (NoSuchMethodException e) {
                     // Do nothing
                 } catch (IllegalAccessException e) {
+                    // Do nothing
+                } catch (InvocationTargetException e) {
                     // Do nothing
                 }
             }
@@ -261,12 +263,12 @@ public class Rule {
             allPossibleTypes.add(possibleTypes);
         } else {
             // 添加包装类
-            ArrayList<Class> possibleTypesOne = new ArrayList<>(possibleTypes);
+            ArrayList<Class> possibleTypesOne = new ArrayList<Class>(possibleTypes);
             possibleTypesOne.add(paramsTypeList.get(depth));
             allPossibleTypes = getPossibleTypesOfMethodParameters(allPossibleTypes, possibleTypesOne, depth + 1);
 
             // 添加对应的原始数据类型
-            ArrayList<Class> possibleTypesTwo = new ArrayList<>(possibleTypes);
+            ArrayList<Class> possibleTypesTwo = new ArrayList<Class>(possibleTypes);
             possibleTypesTwo.add(TypeMethods.getCorrespondingDataTypeByClass(paramsTypeList.get(depth)));
             allPossibleTypes = getPossibleTypesOfMethodParameters(allPossibleTypes, possibleTypesTwo, depth + 1);
         }
