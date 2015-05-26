@@ -3,6 +3,7 @@ package org.linc.spark.sparkstreaming;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,15 +11,9 @@ import java.util.HashMap;
 /**
  * 用于存储规则信息的类
  */
-public class Rules {
+public class Rules implements Serializable{
     private static String ruleFile = "/Users/ihainan/tmp/newRules"; // 规则文件路径
     private InputAndOutputFormat inputAndOutputFormat;
-
-    static {
-        // 获取规则文件路径
-        ruleFile = GlobalConf.rulesFilePath().get();
-    }
-
     private ArrayList<Rule> rules = new ArrayList<Rule>();
 
     /**
@@ -30,8 +25,9 @@ public class Rules {
      * @throws ClassNotFoundException         找不到规则中指定的类
      */
     public Rules(InputAndOutputFormat inputAndOutputFormat) throws IOException, Rule.ParseRuleStrFailException, ClassNotFoundException {
+        Rules.ruleFile = GlobalVar.configMap.get("rule.filePath");
         this.inputAndOutputFormat = inputAndOutputFormat;
-        readRules(); // 从文件中读取规则
+        readRules();    // 从文件中读取规则
     }
 
     /**

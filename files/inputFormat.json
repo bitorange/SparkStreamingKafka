@@ -1,0 +1,8 @@
+{
+	"ipAddress":"String",
+	"method":"String",
+	"endPoint":"String",
+	"protocol":"String",
+	"responseCode":"Integer",
+	"contentSize":"Integer"
+}

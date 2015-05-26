@@ -1,5 +1,6 @@
 package org.linc.spark.sparkstreaming;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.HashMap;
  * 转换规则
  * Created by ihainan on 4/12/15.
  */
-public class Rule {
+public class Rule implements Serializable {
     /**
      * 构造函数
      *
@@ -125,6 +126,7 @@ public class Rule {
             isFromInputField.add(false);
             return Character.class;
         } else {
+            // TODO: 只要是带 $ 符号，则为变量
             // 寻找相符的字段名
             for (String fieldName : inputAndOutputFormat.getInputFormat().keySet()) {
                 if (fieldName.equals(value)) {

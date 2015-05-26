@@ -2,13 +2,12 @@ package org.linc.spark.sparkstreaming
 
 import java.util
 
+import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
 import org.apache.spark.sql._
 import org.apache.spark.streaming.kafka.KafkaUtils
-import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.collection.JavaConversions._
-
 
 /**
  * The Entry of Application
@@ -16,14 +15,51 @@ import scala.collection.JavaConversions._
  */
 
 object ApplicationEntry {
-  // 窗口大小
-  val WINDOW_LENGTH = new Duration(GlobalConf.windowInterval.get.toLong)
-  // 滑动间隔
-  val SLIDE_INTERVAL = new Duration(GlobalConf.slideInterval.get.toLong)
-  // 输入输出格式
-  val inputAndOutputFormat = new InputAndOutputFormat()
-  // 转换规则
-  val rules = new Rules(inputAndOutputFormat)
+  /* Spark Streaming 相关参数 */
+  var WINDOW_LENGTH = new Duration(0)
+  var SLIDE_INTERVAL = new Duration(0)
+  var BATCH_INTERVAL = Seconds(0)
+  var OUTPUT_PATH = ""
+
+  /* ZooKeeper 相关参数 */
+  var ZOOKEEPER_TOPICS = ""
+  var ZOOKEEPER_NUM_THREADS = 1
+  var ZOOKEEPER_GROUP = ""
+  var ZOOKEEPER_URL = ""
+
+  /* SQL 相关 */
+  var SQL_COMMAND = ""
+  var SQL_OUTPUT_PATH = ""
+  var ENABLE_EXTRA_SQL = false
+  var EXTRA_SQL_COMMAND = ""
+
+  /**
+   * 解析配置文件，获取程序配置
+   * @param args 程序运行参数
+   */
+  def readConfigureFile(args: Array[String]): Unit = {
+    GlobalVar.parseArgs(args);
+    ApplicationEntry.WINDOW_LENGTH = new Duration((GlobalVar.configMap.get("stream.window.length")).toLong)
+    ApplicationEntry.SLIDE_INTERVAL = new Duration((GlobalVar.configMap.get("stream.window.slide")).toLong)
+    ApplicationEntry.BATCH_INTERVAL = Seconds((GlobalVar.configMap.get("stream.batchInterval")).toLong)
+    ApplicationEntry.OUTPUT_PATH = GlobalVar.configMap.get("stream.output.savePath")
+
+    ApplicationEntry.ZOOKEEPER_URL = GlobalVar.configMap.get("zookeeper.url")
+    ApplicationEntry.ZOOKEEPER_TOPICS = GlobalVar.configMap.get("zookeeper.topics")
+    ApplicationEntry.ZOOKEEPER_NUM_THREADS = (GlobalVar.configMap.get("zookeeper.numThreads")).toInt
+    ApplicationEntry.ZOOKEEPER_GROUP = GlobalVar.configMap.get("zookeeper.group")
+
+    ApplicationEntry.SQL_COMMAND = GlobalVar.configMap.get("stream.sql.command")
+    ApplicationEntry.SQL_OUTPUT_PATH = GlobalVar.configMap.get("stream.sql.savePath")
+
+    ApplicationEntry.EXTRA_SQL_COMMAND = GlobalVar.configMap.get("stream.extraSQL.command")
+    ApplicationEntry.ENABLE_EXTRA_SQL = GlobalVar.configMap.get("stream.extraSQL.enable").toBoolean
+  }
+
+  def genMapper[A, B](f: A => B): A => B = {
+    val locker = com.twitter.chill.MeatLocker(f)
+    x => locker.get.apply(x)
+  }
 
   /**
    * 程序入口
@@ -31,14 +67,22 @@ object ApplicationEntry {
    */
   def main(args: Array[String]) {
     /* 初始化 */
+    readConfigureFile(args)
+    val inputAndOutputFormat = new InputAndOutputFormat()
+    val rules = new Rules(inputAndOutputFormat)
+
+    /* 初始化 Spark */
     val sparkConf = new SparkConf().setAppName("KafkaWordCount")
     val sc = new SparkContext(sparkConf)
-    val ssc = new StreamingContext(sc, Seconds(GlobalConf.batchInterval.get.toLong))
+    val ssc = new StreamingContext(sc, ApplicationEntry.BATCH_INTERVAL)
     val sqlContext = new SQLContext(sc)
 
     /* 从 Kafka 中读取输入数据 */
-    val topicMap = GlobalConf.topics.get.split(",").map((_, GlobalConf.numThreads.get.toInt)).toMap
-    val lines = KafkaUtils.createStream(ssc, GlobalConf.zkQuorum.get, GlobalConf.group.get, topicMap).map(_._2)
+    val topicMap = ApplicationEntry.ZOOKEEPER_TOPICS.split(",").map((_, ApplicationEntry.ZOOKEEPER_NUM_THREADS)).toMap
+    val lines = KafkaUtils.createStream(ssc, ApplicationEntry.ZOOKEEPER_URL, ApplicationEntry.ZOOKEEPER_GROUP, topicMap).map(_._2)
+    lines.foreachRDD(rdd => {
+      rdd.foreach(println)
+    })
 
     /* 字段规则 */
     val splitRDD = lines.map(x => inputAndOutputFormat.splitInputIntoHashMap(x))
@@ -50,7 +94,7 @@ object ApplicationEntry {
       if (allResult.count() > 0) {
         val finalRDD = allResult.map(result => result) // Nothing to do
         finalRDD.collect().foreach(println)
-        finalRDD.saveAsTextFile(GlobalConf.outputPath.get)
+        finalRDD.saveAsTextFile(ApplicationEntry.OUTPUT_PATH)
       }
     })
 
@@ -97,11 +141,11 @@ object ApplicationEntry {
         outputSchemaRDD.registerTempTable("output")
 
         // 执行 SQL 查询
-        val contentSizeStats = sqlContext.sql(GlobalConf.sql.get)
+        val contentSizeStats = sqlContext.sql(ApplicationEntry.SQL_COMMAND)
         println("SQL Query Result: ")
         println("Count = " + contentSizeStats.count)
         contentSizeStats.collect().foreach(println)
-        contentSizeStats.saveAsTextFile(GlobalConf.sqlOutPutPath.get)
+        contentSizeStats.saveAsTextFile(ApplicationEntry.SQL_OUTPUT_PATH)
       }
     })
 

@@ -6,6 +6,7 @@ import org.codehaus.jettison.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -13,20 +14,14 @@ import java.util.LinkedHashMap;
 /**
  * 本类用于表示输入和输出格式
  */
-public class InputAndOutputFormat {
-    private static String inputFormatFilePath = "/Users/ihainan/tmp/inputFormat.json";
-    private static String outputFormatFilePath = "/Users/ihainan/tmp/outputFormat.json";
-
-    /**
-     *  从配置文件中读取输入格式文件路径和输出和格式文件路径
-     */
-    static {
-        inputFormatFilePath = GlobalConf.inputFormatFilePath().get();
-        outputFormatFilePath = GlobalConf.outputFormatFilePath().get();
-    }
-
-    private LinkedHashMap<String, String> inputFormat = new LinkedHashMap<String, String>();  // 输入格式，通过 字段：属性 的集合表示
-    private LinkedHashMap<String, String> outputFormat = new LinkedHashMap<String, String>(); // 输出格式，通过 字段：属性 的集合表示
+public class InputAndOutputFormat implements Serializable {
+    private static String inputFormatFilePath = "files/inputFormat.json";
+    private static String outputFormatFilePath = "files/outputFormat.json";
+    private static String extraSQLOutputFormatFilePath = "files/extraSQLFormat.json";
+    private LinkedHashMap<String, String> inputFormat = new LinkedHashMap<String, String>();             // 输入格式，通过 字段：属性 的集合表示
+    private LinkedHashMap<String, String> outputFormat = new LinkedHashMap<String, String>();            // 输出格式，通过 字段：属性 的集合表示
+    private LinkedHashMap<String, String> extraSQLOutputFormat = new LinkedHashMap<>();     // 额外 SQL 输出格式，通过 字段：属性 的集合表示
+    private static boolean enableExtraSQL = false;    // 是否开启对输出结果进一步执行 SQL 操作
 
     /**
      * 获取输入数据格式
@@ -44,6 +39,14 @@ public class InputAndOutputFormat {
      */
     public LinkedHashMap<String, String> getOutputFormat() {
         return outputFormat;
+    }
+
+    /**
+     * 获取额外 SQL 输出格式
+     * @return 额外 SQL 输出格式
+     */
+    public LinkedHashMap<String, String> getExtraSQLOutputFormat() {
+        return extraSQLOutputFormat;
     }
 
     /**
@@ -83,16 +86,29 @@ public class InputAndOutputFormat {
      * @throws org.codehaus.jettison.json.JSONException 解析失败
      */
     public InputAndOutputFormat() throws IOException, JSONException {
+        // 获取输入格式 / 输出格式文件路径
+        InputAndOutputFormat.inputFormatFilePath = GlobalVar.configMap.get("stream.input.formatFilePath");
+        InputAndOutputFormat.outputFormatFilePath = GlobalVar.configMap.get("stream.output.formatFilePath");
+        InputAndOutputFormat.enableExtraSQL = Boolean.valueOf(GlobalVar.configMap.get("stream.extraSQL.enable"));
+
         // 解析输入格式
-        HashMap<String, String> inputFormatObj = this.parseFormatFile(inputFormatFilePath);
+        HashMap<String, String> inputFormatObj = this.parseFormatFile(InputAndOutputFormat.inputFormatFilePath);
         for (String key : inputFormatObj.keySet()) {
             inputFormat.put(key, String.valueOf(inputFormatObj.get(key)));
         }
 
         // 解析输出格式
-        HashMap<String, String> outputFormatObj = this.parseFormatFile(outputFormatFilePath);
+        HashMap<String, String> outputFormatObj = this.parseFormatFile(InputAndOutputFormat.outputFormatFilePath);
         for (String key : outputFormatObj.keySet()) {
             outputFormat.put(key, String.valueOf(outputFormatObj.get(key)));
+        }
+
+        // 解析额外 SQL 输出格式
+        if(enableExtraSQL){
+            HashMap<String, String> extraSQLOutputFormatObj = this.parseFormatFile(InputAndOutputFormat.extraSQLOutputFormatFilePath);
+            for (String key : extraSQLOutputFormatObj.keySet()) {
+                extraSQLOutputFormat.put(key, String.valueOf(extraSQLOutputFormatObj.get(key)));
+            }
         }
     }
 

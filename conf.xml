@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<property>
+    <!-- ZooKeeper 服务器资源地址 -->
+    <entry key="zookeeper.url">10.4.21.220:2181</entry>
+
+    <!-- ZooKeeper 消息群名称 -->
+    <entry key="zookeeper.group">mykafka</entry>
+
+    <!-- ZooKeeper 消息主题 -->
+    <entry key="zookeeper.topics">kafkalog</entry>
+
+    <!-- ZooKeeper 线程数 -->
+    <entry key="zookeeper.numThreads">2</entry>
+
+    <!-- 输出流数据存储路径 -->
+    <entry key="stream.output.savePath">/tmp/outputResult</entry>
+
+    <!-- 是否开启对输出结果进一步执行 SQL 操作 -->
+    <entry key="stream.extraSQL.enable">false</entry>
+
+    <!-- 进一步执行的 SQL 指令 -->
+    <entry key="stream.extraSQL.command">SELECT * FROM output</entry>
+
+    <!-- 额外 SQL 输出格式定义文件的文件路径 -->
+    <entry key="stream.extraSQL.formatFilePath">file/extraSQLFormat.json</entry>
+
+    <!-- SQL 执行结果存储路径 -->s
+    <entry key="stream.sql.savePath">/tmp/SQLOutputResult</entry>
+
+    <!-- SQL 命令 -->
+    <entry key="stream.sql.command">SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM input
+    </entry>
+
+    <!-- 输入格式定义文件的文件路径 -->
+    <entry key="stream.input.formatFilePath">files/inputFormat.json</entry>
+
+    <!-- 输出格式定义文件的文件路径 -->
+    <entry key="stream.output.formatFilePath">files/outputFormat.json</entry>
+
+    <!-- 规则文件的文件路径 -->
+    <entry key="rule.filePath">files/rules</entry>
+
+    <!-- 批处理时间间隔，单位为秒 -->
+    <entry key="stream.batchInterval">2</entry>
+
+    <!-- 窗口大小，单位为毫秒 -->
+    <entry key="stream.window.length">18000</entry>
+
+    <!-- 窗口滑动时间间隔，单位为毫秒，必须是 batch interval 的正整数倍数 -->
+    <entry key="stream.window.slide">6000</entry>
+</property>
