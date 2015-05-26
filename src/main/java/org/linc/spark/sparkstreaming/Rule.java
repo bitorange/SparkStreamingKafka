@@ -127,12 +127,15 @@ public class Rule implements Serializable {
             return Character.class;
         } else {
             // TODO: 只要是带 $ 符号，则为变量
-            // 寻找相符的字段名
-            for (String fieldName : inputAndOutputFormat.getInputFormat().keySet()) {
-                if (fieldName.equals(value)) {
-                    String typeStr = inputAndOutputFormat.getInputFormat().get(fieldName);
-                    isFromInputField.add(true);
-                    return TypeMethods.getClassByName(typeStr);
+            if (value.charAt(0) == 36) {
+                value = value.substring(1);
+                // 寻找相符的字段名
+                for (String fieldName : inputAndOutputFormat.getInputFormat().keySet()) {
+                    if (fieldName.equals(value)) {
+                        String typeStr = inputAndOutputFormat.getInputFormat().get(fieldName);
+                        isFromInputField.add(true);
+                        return TypeMethods.getClassByName(typeStr);
+                    }
                 }
             }
 
@@ -178,7 +181,7 @@ public class Rule implements Serializable {
         for (int i = 0; i < parametersValue.length; ++i) {
             String parameterValue = parametersValue[i];
             if (isFromInputField.get(i)) {
-                parametersValue[i] = inputValue.get(parameterValue).toString();
+                parametersValue[i] = inputValue.get(parameterValue.substring(1)).toString();
             } else if (parameterValue.charAt(0) == 34 && parameterValue.charAt(parameterValue.length() - 1) == 34
                     || parameterValue.charAt(0) == 39 && parameterValue.charAt(parameterValue.length() - 1) == 39) {
                 parametersValue[i] = parameterValue.substring(0, parameterValue.length() - 1).substring(1);
