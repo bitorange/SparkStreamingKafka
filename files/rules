@@ -1,1 +1,2 @@
 contentSizeWithUnit:org.linc.spark.sparkstreaming.MyFunctions:add:$contentSize,"KB"
+size:org.linc.spark.sparkstreaming.MyFunctions:add:$contentSize,"MB"

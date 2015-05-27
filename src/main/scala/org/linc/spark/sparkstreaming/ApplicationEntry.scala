@@ -2,6 +2,7 @@ package org.linc.spark.sparkstreaming
 
 import java.util
 
+import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
 import org.apache.spark.sql._
 import org.apache.spark.streaming.kafka.KafkaUtils
@@ -11,9 +12,8 @@ import scala.collection.JavaConversions._
 
 /**
  * The Entry of Application
- * Created by xwc on 2015/4/12.
+ * Author: xwc / ihainan
  */
-
 object ApplicationEntry {
   /* Spark Streaming 相关参数 */
   var WINDOW_LENGTH = new Duration(0)
@@ -84,13 +84,53 @@ object ApplicationEntry {
       rdd.foreach(println)
     })
 
-    /* 字段规则 */
-    val splitRDD = lines.map(x => inputAndOutputFormat.splitInputIntoHashMap(x))
-    val inputArrayRDD = lines.map(x => new util.ArrayList(inputAndOutputFormat.splitInputIntoHashMap(x).values()))
-    val outputArrayRDD = splitRDD.map(x => rules.applyRules(x))
+    lines.count().foreachRDD(rdd => {
+      rdd.foreach(x => println("My Count = " + x))
+    })
 
+    /* 字段规则 */
+    val splitLines = lines.map(x => inputAndOutputFormat.splitInputIntoHashMap(x))
+    val inputArrayDStream = lines.map(x => new util.ArrayList(inputAndOutputFormat.splitInputIntoHashMap(x).values()))
+    val outputArrayDStream = splitLines.map(x => rules.applyRules(x))
+    var finalOutputArrayDStream = outputArrayDStream // 考虑是否带额外 SQL 的情况
+
+    /* 创建 Schema */
+    import org.apache.spark.sql._
+
+    /* 额外的 SQL 查询 */
+    if (ENABLE_EXTRA_SQL) {
+      // 创建 Schema
+      val extraSQLInputSchema =
+        StructType(inputAndOutputFormat.getOutputFormat.keySet().toArray().map(key =>
+          StructField(key.toString,
+            getType(inputAndOutputFormat.getOutputFormat.get(key)), true)))
+
+      // 实际上，这里仅会有一个或者零个 RDD
+      outputArrayDStream.foreachRDD(rdd => {
+        rdd.foreach(x => println("_ " + x))
+      })
+
+      finalOutputArrayDStream = outputArrayDStream.transform(rdd => {
+        // 注册 extraInput 表并往里插入数据
+        rdd.foreach(x => println("_ " + x))
+        val extraSQLInputRowRDD = rdd.map(Row.fromSeq(_))
+        val extraSQLInputSchemaRDD = sqlContext.applySchema(extraSQLInputRowRDD, extraSQLInputSchema)
+        extraSQLInputSchemaRDD.registerTempTable("extraInput")
+
+        val result = sqlContext.sql(ApplicationEntry.EXTRA_SQL_COMMAND)
+        println("Extra SQL Query Result: ")
+        result.foreach(println(_))
+        val r = SchemaRDDToRDD(result).map(x => {
+          new util.ArrayList[Object](x.values.toList)
+        })
+        r
+      })
+
+    }
+
+    // TODO: FinalOutputArray
     /* 输出结果到文件系统当中 */
-    outputArrayRDD.foreachRDD(allResult => {
+    finalOutputArrayDStream.foreachRDD(allResult => {
       if (allResult.count() > 0) {
         val finalRDD = allResult.map(result => result) // Nothing to do
         finalRDD.collect().foreach(println)
@@ -98,8 +138,8 @@ object ApplicationEntry {
       }
     })
 
-    /* 创建 Schema */
-    import org.apache.spark.sql._
+    /* 常规 SQL 统计*/
+    // 创建 Schema
     val inputSchema =
       StructType(inputAndOutputFormat.getInputFormat.keySet().toArray().map(key => {
         // println("Key =" + key)
@@ -107,13 +147,14 @@ object ApplicationEntry {
           getType(inputAndOutputFormat.getInputFormat.get(key)), true)
       }).toSeq) // input 表 Schema
     val outputSchema =
-      StructType(inputAndOutputFormat.getOutputFormat.keySet().toArray().map(key =>
+      StructType(inputAndOutputFormat.getFinalOutputFormat.keySet().toArray().map(key =>
         StructField(key.toString,
           getType(inputAndOutputFormat.getOutputFormat.get(key)), true))) // output 表 Schema
 
     /* 窗口 */
-    val tmpInputTupleRDD = inputArrayRDD.map(x => (1, x))
-    val tmpOutputTupleRDD = outputArrayRDD.map(x => (2, x))
+    // TODO: FinalOutputFormat, FinalOutputArray
+    val tmpInputTupleRDD = inputArrayDStream.map(x => (1, x))
+    val tmpOutputTupleRDD = finalOutputArrayDStream.map(x => (2, x))
     val combinedInputAndOutputRDD = tmpInputTupleRDD.union(tmpOutputTupleRDD)
     // combinedInputAndOutputRDD.foreach(x => println(x.collect().foreach(println)))
     val windowDStream = combinedInputAndOutputRDD.window(WINDOW_LENGTH, SLIDE_INTERVAL)
@@ -185,4 +226,30 @@ object ApplicationEntry {
     }
     StringType
   }
+
+  def SchemaRDDToRDD(schemaRDD: SchemaRDD): RDD[Map[String, String]] = {
+    val types = schemaRDD.schema.fields.map(field => field.dataType.toString)
+    val names = schemaRDD.schema.fields.map(field => field.name)
+    schemaRDD.map(row => rowToString(row, types.toArray, names.toArray))
+  }
+
+  def rowToString(row: Row, types: Array[String], names: Array[String]): Map[String, String] = {
+    val values = (0 until row.length).map { i => getValue(types, row, i) }
+    (names zip values).toMap
+  }
+
+  def getValue(types: Array[String], row: Row, i: Int): String = {
+    val dataType = types(i)
+    dataType match {
+      case "IntegerType" => row.getInt(i).toString()
+      case "FloatType" => row.getFloat(i).toString()
+      case "LongType" => row.getLong(i).toString()
+      case "DoubleType" => row.getDouble(i).toString()
+      case "TimestampType" => row.getString(i).toString()
+      case "ShortType" => row.getShort(i).toString()
+      case "ByteType" => row.getByte(i).toString()
+      case "StringType" => row.getString(i).toString()
+    }
+  }
+
 }

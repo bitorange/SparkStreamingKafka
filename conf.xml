@@ -16,10 +16,10 @@
     <entry key="stream.output.savePath">/tmp/outputResult</entry>
 
     <!-- 是否开启对输出结果进一步执行 SQL 操作 -->
-    <entry key="stream.extraSQL.enable">false</entry>
+    <entry key="stream.extraSQL.enable">true</entry>
 
     <!-- 进一步执行的 SQL 指令 -->
-    <entry key="stream.extraSQL.command">SELECT * FROM output</entry>
+    <entry key="stream.extraSQL.command">SELECT size FROM extraInput</entry>
 
     <!-- 额外 SQL 输出格式定义文件的文件路径 -->
     <entry key="stream.extraSQL.formatFilePath">file/extraSQLFormat.json</entry>
@@ -28,7 +28,7 @@
     <entry key="stream.sql.savePath">/tmp/SQLOutputResult</entry>
 
     <!-- SQL 命令 -->
-    <entry key="stream.sql.command">SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM input
+    <entry key="stream.sql.command">SELECT SUM(size), COUNT(*), MIN(size), MAX(size) FROM output
     </entry>
 
     <!-- 输入格式定义文件的文件路径 -->

@@ -21,6 +21,7 @@ public class InputAndOutputFormat implements Serializable {
     private LinkedHashMap<String, String> inputFormat = new LinkedHashMap<String, String>();             // 输入格式，通过 字段：属性 的集合表示
     private LinkedHashMap<String, String> outputFormat = new LinkedHashMap<String, String>();            // 输出格式，通过 字段：属性 的集合表示
     private LinkedHashMap<String, String> extraSQLOutputFormat = new LinkedHashMap<>();     // 额外 SQL 输出格式，通过 字段：属性 的集合表示
+    private LinkedHashMap<String, String> finalOutputFormat = new LinkedHashMap<>();     // 额外 SQL 输出格式，通过 字段：属性 的集合表示
     private static boolean enableExtraSQL = false;    // 是否开启对输出结果进一步执行 SQL 操作
 
     /**
@@ -43,10 +44,18 @@ public class InputAndOutputFormat implements Serializable {
 
     /**
      * 获取额外 SQL 输出格式
+     *
      * @return 额外 SQL 输出格式
      */
     public LinkedHashMap<String, String> getExtraSQLOutputFormat() {
         return extraSQLOutputFormat;
+    }
+
+    /** 获取数据最终输出格式
+     * @return 最终输出格式
+     */
+    public LinkedHashMap<String, String> getFinalOutputFormat() {
+        return finalOutputFormat;
     }
 
     /**
@@ -104,11 +113,14 @@ public class InputAndOutputFormat implements Serializable {
         }
 
         // 解析额外 SQL 输出格式
-        if(enableExtraSQL){
+        if (enableExtraSQL) {
             HashMap<String, String> extraSQLOutputFormatObj = this.parseFormatFile(InputAndOutputFormat.extraSQLOutputFormatFilePath);
             for (String key : extraSQLOutputFormatObj.keySet()) {
                 extraSQLOutputFormat.put(key, String.valueOf(extraSQLOutputFormatObj.get(key)));
             }
+            finalOutputFormat = extraSQLOutputFormat;
+        } else {
+            finalOutputFormat = outputFormat;
         }
     }
 
