@@ -25,12 +25,17 @@ public class GlobalVar {
         configMap.put("zookeeper.group", "mykafka");
         configMap.put("zookeeper.topics", "kafkalog");
         configMap.put("zookeeper.numThreads", "2");
+
+        configMap.put("stream.input.format", "separator");
+        configMap.put("stream.input.separator", "\t");
+
         configMap.put("stream.output.savePath", "/tmp/outputResult");
         configMap.put("stream.sql.savePath", "/tmp/SQLOutputResult");
         configMap.put("stream.sql.command", "SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM input");
         configMap.put("stream.input.formatFilePath", "files/inputFormat.json");
         configMap.put("stream.output.formatFilePath", "files/outputFormat.json");
         configMap.put("rule.filePath", "files/rules");
+
         configMap.put("stream.batchInterval", "2");
         configMap.put("stream.window.length", "18000");
         configMap.put("stream.window.slide", "6000");

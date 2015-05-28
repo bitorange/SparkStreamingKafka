@@ -13,12 +13,13 @@ libraryDependencies ++= {
     "org.apache.spark" % "spark-sql_2.10" % "1.2.0",
     "org.apache.spark" %% "spark-streaming" % "1.3.0",
     "org.apache.spark" %% "spark-streaming-kafka" % "1.3.0",
-    "org.codehaus.jettison" % "jettison" % "1.3.5",
     "net.sourceforge.argparse4j" % "argparse4j" % "0.2.0"
   )
 }
 
 libraryDependencies += "javax.servlet" % "javax.servlet-api" % "3.0.1"
+
+libraryDependencies += "net.sf.json-lib" % "json-lib" % "2.1" classifier "jdk15"
 
 assemblySettings
 

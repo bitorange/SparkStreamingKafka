@@ -12,6 +12,14 @@
     <!-- ZooKeeper 线程数 -->
     <entry key="zookeeper.numThreads">2</entry>
 
+    <!-- 输入数据格式（separator / xml / json） -->
+    <!-- <entry key="stream.input.format">separator</entry> -->
+    <!-- <entry key="stream.input.format">json</entry> -->
+    <entry key="stream.input.format">xml</entry>
+
+    <!-- 使用的分隔符 -->
+    <entry key="stream.input.separator">&#009;</entry>
+
     <!-- 输出流数据存储路径 -->
     <entry key="stream.output.savePath">/tmp/outputResult</entry>
 

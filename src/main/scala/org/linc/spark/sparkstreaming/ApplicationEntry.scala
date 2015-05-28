@@ -20,6 +20,8 @@ object ApplicationEntry {
   var SLIDE_INTERVAL = new Duration(0)
   var BATCH_INTERVAL = Seconds(0)
   var OUTPUT_PATH = ""
+  var INPUT_FORMAT = "separator"
+  var SEPARATOR = "\t"
 
   /* ZooKeeper 相关参数 */
   var ZOOKEEPER_TOPICS = ""
@@ -43,6 +45,9 @@ object ApplicationEntry {
     ApplicationEntry.SLIDE_INTERVAL = new Duration((GlobalVar.configMap.get("stream.window.slide")).toLong)
     ApplicationEntry.BATCH_INTERVAL = Seconds((GlobalVar.configMap.get("stream.batchInterval")).toLong)
     ApplicationEntry.OUTPUT_PATH = GlobalVar.configMap.get("stream.output.savePath")
+
+    ApplicationEntry.INPUT_FORMAT = GlobalVar.configMap.get("stream.input.format")
+    ApplicationEntry.SEPARATOR = GlobalVar.configMap.get("stream.input.separator")
 
     ApplicationEntry.ZOOKEEPER_URL = GlobalVar.configMap.get("zookeeper.url")
     ApplicationEntry.ZOOKEEPER_TOPICS = GlobalVar.configMap.get("zookeeper.topics")
@@ -82,10 +87,6 @@ object ApplicationEntry {
     val lines = KafkaUtils.createStream(ssc, ApplicationEntry.ZOOKEEPER_URL, ApplicationEntry.ZOOKEEPER_GROUP, topicMap).map(_._2)
     lines.foreachRDD(rdd => {
       rdd.foreach(println)
-    })
-
-    lines.count().foreachRDD(rdd => {
-      rdd.foreach(x => println("My Count = " + x))
     })
 
     /* 字段规则 */
