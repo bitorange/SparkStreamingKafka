@@ -1,0 +1,2 @@
+{ "ipAddress":"1.1.1.1", "method":"GET", "endPoint":"/apps/logs/LogAnalyzer.java", "protocol":"HTTP/1.1", "responseCode":"200", "contentSize":"1000"}
+{ "ipAddress":"2.1.1.1", "method":"GET", "endPoint":"/apps/logs/LogAnalyzer.java", "protocol":"HTTP/1.1", "responseCode":"200", "contentSize":"1000"}

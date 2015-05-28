@@ -1,0 +1,1 @@
+<xml> <entry key="ipAddress">1.1.1.1</entry> <entry key="method">GET</entry><entry key="endPoint">/apps/logs/LogAnalyzer.java</entry> <entry key="protocol">HTTP/1.1</entry> <entry key="responseCode">200</entry> <entry key="contentSize">1000</entry></xml>
